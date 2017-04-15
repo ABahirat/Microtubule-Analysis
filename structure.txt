@@ -1,0 +1,19 @@
+Here's what I was thinking so far for structure:
+
+Obersvations: change in length of microtubules. Since this is a
+                continous value we will have to bin the values. I
+                think that patrick was talking about 5 bins but
+                that will deend on our data. Maybe a bin for very negative,
+                negative, zero, positive, and very positive. This might take
+                some adjustment though.
+
+States: Growing, shrinking, pause. We have talked about this a good amount so
+                won't go into much depth.
+
+Program structure: Probably a CLI menu where you can pick a file to train off of
+                and on option to run vertibi and check agaisnt a file and then
+                posible other HMM algos. 
+
+Sorry this isn't super in depth I need to leave my place for the rest of the
+afternoon so I can't write up anything long. I'll probably get to work a little
+on this tomorrow.
