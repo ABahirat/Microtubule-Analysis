@@ -114,9 +114,60 @@ def train_hmm():
 #   Returns None
 #
 ######################################################################################
-def viterbi():
-    input_file = raw_input("Input file to run viterbi on: ")
-    raw_input("Press enter to continue...")
+#def viterbi():
+#    input_file = raw_input("Input file to run viterbi on: ")
+#    raw_input("Press enter to continue...")
+
+def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p all are dictionaries
+    V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
+    #Calculate V0, x for all states x, where 0 is time
+    for st in states:
+        #index = 0
+        #if obs[0] in emit_p[st]:
+         #   index = emit_p[st][obs[0]]
+        V[0][st] = {"prob": start_p[st] * emit_p[st][obs[0]], "prev": None}
+        #emit_p is pr(evidence | state), first dictionary contains key "prob" = start_pr for the state * emp_p for the state and "prev" none
+        #obs is evidence at each time
+        #obs[0] is Normal
+        #V[0][st] = {"prob": start_p[st] * index, "prev": None} 
+    # Run Viterbi when t > 0
+
+    #print v[0][st] results in 
+    for t in range(1, len(obs)): #loop through all observations, starting at second one, already looked at normal above
+        V.append({}) #append dictionary to V
+        for st in states:
+            #v[t-1][prev_st]["prob"] is probability of being in prev_st at t-1
+            #calculate previous time through loop
+            #trans_p[prev_st][st] is transition probabilities
+            max_tr_prob = max(V[t-1][prev_st]["prob"]*trans_p[prev_st][st] for prev_st in states) #
+            for prev_st in states: #incorporating evidence
+                if V[t-1][prev_st]["prob"] * trans_p[prev_st][st] == max_tr_prob:
+                    #emit_p[st][obs[t]] is emission probability of seeing observation in this state
+                    #obst[t] is observation at time t
+                    max_prob = max_tr_prob * emit_p[st][obs[t]]
+                    #store V for time t in state st
+                    V[t][st] = {"prob": max_prob, "prev": prev_st}
+                    break
+    for line in dptable(V):
+        print line
+
+    opt = []
+    # The highest probability
+    max_prob = max(value["prob"] for value in V[-1].values())
+    previous = None
+    # Get most probable state and its backtrack
+    for st, data in V[-1].items():
+        #print st, data
+        if data["prob"] == max_prob:
+            opt.append(st)
+            previous = st
+            break
+    # Follow the backtrack till the first observation
+    for t in range(len(V) - 2, -1, -1):
+        opt.insert(0, V[t + 1][previous]["prev"])
+        previous = V[t + 1][previous]["prev"]
+
+    print 'The steps of states are ' + ' '.join(opt) + ' with highest probability of %s' % max_prob
 
 ######################################################################################
 # Exit Program Function
