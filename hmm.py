@@ -210,20 +210,8 @@ def do_train(flengths, fstates):
     training[states] = states_set
     training[starts] = start_prob
     training[transitions] = transition_prob
-    training[emissions] = emission prob
+    training[emissions] = emission_prob
     return training #returns a dictionary with set of states, and the start, transition and emission probabilities
-
-    #outputs a list:
-    # index 0
-    
-
-
-
-
-            
-    
-    
-                
 
 def train_hmm():
     input_file = raw_input("Input lengths file to use for training: ")
