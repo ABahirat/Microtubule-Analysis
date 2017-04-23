@@ -26,6 +26,7 @@
 ######################################################################################
 import os, sys, getopt, operator
 import numpy as np
+from sklearn.metrics import f1_score, classification_report, confusion_matrix
 
 
 ######################################################################################
@@ -228,10 +229,6 @@ def train_hmm():
 #   Returns None
 #
 ######################################################################################
-#def viterbi():
-#    input_file = raw_input("Input file to run viterbi on: ")
-#    raw_input("Press enter to continue...")
-
 def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p all are dictionaries
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
     #Calculate V0, x for all states x, where 0 is time
@@ -284,6 +281,46 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
     print 'The steps of states are ' + ' '.join(opt) + ' with highest probability of %s' % max_prob
 
 ######################################################################################
+# Calculate Metrics Function
+#   
+#
+######################################################################################s
+def calculate_metrics(results, truth_data):
+    if len(results) != len(truth_data):
+        print("Different lengths of results and truth data!")
+        print("Results Length: {0}\t Truth Data Length: {1}".format(len(results),len(truth_data)))
+        return
+
+    results_len = len(results)
+
+    # Calculate Accuracy
+    correct = 0.0
+    for i in range(results_len):
+        if results[i] == truth_data[i]:
+            correct += 1
+    accuracy = correct/results_len
+    print("Overall Accuracy:\t{0}".format(accuracy))
+
+    # Calculate f-measure
+    f1_macro = f1_score(truth_data, results, average='macro')
+    f1_weighted = f1_score(truth_data, results, average='weighted')
+    print("F-measure macro:\t{0}".format(f1_macro))
+    print("F-measure weighred:\t{0}".format(f1_weighted))
+
+    # Classification report
+    report = classification_report(truth_data, results, digits=4)
+    print("Report:\n{0}".format(report))
+
+    # Confusion matrix
+    matrix = confusion_matrix(truth_data,results)
+    print("Confusion Matrix:")
+    print(matrix)
+
+    print("\nFinished results!")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    return
+
+######################################################################################
 # Exit Program Function
 #   Exits program
 #
@@ -322,6 +359,8 @@ def main(argv):
     # Get command line arguments
     data_file,trainging_file,algorithm  = handle_args(argv)
 
+
+
     # Run using arguments
     if data_file:
         print("Data File:\t{0}".format(data_file))
@@ -341,6 +380,12 @@ def main(argv):
         except KeyError:
             os.system('clear')
             print "Invalid selection, please try again.\n"
+
+    calculate_metrics([0,0,0,0,0,0,1,2,3],[0,1,0,3,0,0,1,2,3])
+    calculate_metrics([0,0,0],[0,1,0,3,0,0,1,2,3])
+    calculate_metrics([0,1,0,3,0,0,1,2,3],[0,1,0,3,0,0,1,2,3])
+    calculate_metrics([1,2,3,1,2,3,1,2,3],[1,2,3,1,2,3,1,2,3])
+
 
     return
 
