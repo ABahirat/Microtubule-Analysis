@@ -242,6 +242,7 @@ def train_hmm():
 
 ######################################################################################
 # Viterbi Function
+# Source: https://en.wikipedia.org/wiki/Viterbi_algorithm
 #   Runs viterbi using previously calculated probabilities
 #   Prints out accuracy calculations
 #
@@ -300,7 +301,7 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
     print 'The steps of states are ' + ' '.join(opt) + ' with highest probability of %s' % max_prob
 ######################################################################################
 # Forward/Backward Algorithm
-#
+# Source: https://en.wikipedia.org/wiki/Forward-backward_algorithm
 #
 #
 ######################################################################################
