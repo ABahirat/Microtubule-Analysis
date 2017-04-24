@@ -97,6 +97,24 @@ def print_menu_options():
     return
 
 ######################################################################################
+# Bin Function
+#   Given some float, will return a binned float in the set of bins currently in use
+#
+#   Returns binned float
+#
+######################################################################################
+def bin(value):
+    bins = [-0.2,-0.1,0.0,0.1,0.2]
+    best = 999999
+    dist = 999999
+    for i in range(len(bins)):
+        new = abs(bins[i] - value)
+        if(abs(new) < dist):
+            best = bins[i]
+            dist = abs(new)
+    return best
+
+######################################################################################
 # Train HMM Function
 #   Train hmm on data file
 #
@@ -124,10 +142,11 @@ def do_train(flengths, fstates):
         print "matrices not same size"
         exit(0)
 
-    for i in range(length_height):
+    for i in range(length_height-1):
         pair_list.append((-99999.,-99999)) # using -999 as start state/value
         for j in range(len(length_matrix[0])):
-            pair_list.append((length_matrix[i][j],state_matrix[i][j]))
+            newlength = bin(length_matrix[i+1][j] - length_matrix[i][j]) #get diff of lengths and bin
+            pair_list.append((newlength,state_matrix[i][j]))
         pair_list.append((99999.,99999)) # using 999 as end state/value
     
     print "Done parsing..."
