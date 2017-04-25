@@ -258,7 +258,7 @@ def run_viterbi(observations_file,truth_file,training):
     print("\nRunning Viterbi...")
 
     # Open observation and truth data files
-    # Find diffences between previous values
+    # Find diffences between previous values for obs
     # Put into bins 
     obs = []
     with open(observations_file, 'r') as observations:
@@ -291,6 +291,7 @@ def run_viterbi(observations_file,truth_file,training):
     # Calculate total metric of viterbi
     print("Calculating total accuracy...")
     calculate_metrics(results_total, truth_total)
+    return
 
 ######################################################################################
 # Viterbi Function
@@ -304,7 +305,6 @@ def run_viterbi(observations_file,truth_file,training):
 def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p all are dictionaries
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
     #Calculate V0, x for all states x, where 0 is time
-    print(states)
     for st in states:
         #index = 0
         #if obs[0] in emit_p[st]:
