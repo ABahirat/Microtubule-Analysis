@@ -151,11 +151,10 @@ def do_train(flengths, fstates):
         with open(fstates, 'r') as states:
             for line in lengths:
                 length_height += 1
-                length_matrix.append(line.split(','))
+                length_matrix.append((line.rstrip()).split(','))
             for line in states:
                 state_height += 1
-                state_matrix.append(line.split(','))
-
+                state_matrix.append((line.rstrip()).split(','))
 
     if length_height != state_height or len(length_matrix[0]) != len(state_matrix[0]):
         print "matrices not same size"
