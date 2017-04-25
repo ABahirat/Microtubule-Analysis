@@ -1,16 +1,19 @@
 ######################################################################################
 #   File            : hmm.py
 #   Purpose         : Hidden Markov Model for microtuule analysis
-#   Developer       : Thomas Lillis, Ameya Bahirat, Robert Ballard
+#   Developers      : Thomas Lillis, Ameya Bahirat, Robert Ballard
+#                     Peilin Xin, Mackenzie Colwell, Patrick Flynn
 ######################################################################################
 #   
 #   Sample command line arguments to run program: 
 #
-#       python hmm.py -D test.data -T training.data -A viterbi
+#       python hmm.py -L lengths.csv -S states.cvs -O obs.csv -T truth.csv -A viterbi
 #
-#   -D specifies the testing data
-#   -T specifies the training file
-#   -A specifies the scoring file to be used
+#   -L specifies lengths file to be trained on
+#   -S specifies states file to be trained on
+#   -O specifies observation file to run algorithm on
+#   -T specifies the truth data to check the algorithm against
+#   -A specifies the algorithm to run
 #
 ######################################################################################
 #   
@@ -160,6 +163,7 @@ def do_train(flengths, fstates):
         pair_list.append((-99999.,-99999)) # using -999 as start state/value
         for j in range(len(length_matrix[0])):
             newlength = bin(float(length_matrix[i+1][j]) - float(length_matrix[i][j])) #get diff of lengths and bin
+            # no .1 are being set here
             pair_list.append((newlength,state_matrix[i][j]))
         pair_list.append((99999.,99999)) # using 999 as end state/value
     
@@ -204,6 +208,8 @@ def do_train(flengths, fstates):
             if state1 not in state_data[state] and state1 not in transition_prob[state]: #if state combination does not exist
                 state_data[state][state1] = 0
                 transition_prob[state][state1] = 0
+
+    print(lengths_set) # looks like .1 doesn't exist in this. 
 
     for length in lengths_set:
         #if state not in length_data.keys() and state not in emission_prob.keys():
@@ -328,6 +334,10 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
                 if V[t-1][prev_st]["prob"] * trans_p[prev_st][st] == max_tr_prob:
                     #emit_p[st][obs[t]] is emission probability of seeing observation in this state
                     #obst[t] is observation at time t
+                    print(emit_p[st])
+                    print(obs[t])
+                    print(t)
+                    print(emit_p[st][obs[t]])
                     max_prob = max_tr_prob * emit_p[st][obs[t]]
                     #store V for time t in state st
                     V[t][st] = {"prob": max_prob, "prev": prev_st}
