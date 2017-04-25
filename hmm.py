@@ -172,6 +172,7 @@ def do_train(flengths, fstates):
     
     transition_prob = {}
     emission_prob = {}
+    transition_prob_fwdbkw = {}
     start_prob = {}
     state_data = {}
     length_data = {}
@@ -205,10 +206,12 @@ def do_train(flengths, fstates):
         if state not in state_data.keys():
             state_data[state] = {}
             transition_prob[state] = {}
+            transition_prob_fwdbkw[state] = {}
         for state1 in states_set:
             if state1 not in state_data[state] and state1 not in transition_prob[state]: #if state combination does not exist
                 state_data[state][state1] = 0
                 transition_prob[state][state1] = 0
+                transition_prob_fwdbkw[state][state1] = 0
 
     print(lengths_set)
 
@@ -238,14 +241,19 @@ def do_train(flengths, fstates):
     print "Storing emission and transition probabilities... "
             
     for state in states_set:
+        transition_prob_fwdbkw[state]['E'] = float(0.01)
         for state1 in states_set:
             #if transition_prob[tag1][tag] == 0:
             transition_prob[state1][state] = float(state_data[state1][state])/float(state_count[state]) 
+            transition_prob_fwdbkw[state1][state] = float(state_data[state1][state])/float(state_count[state]) 
 
     for length in lengths_set:
         for state in states_set:
             #if emission_prob[tag][word] == 0:
             emission_prob[state][length] = float(length_data[length][state])/float(state_count[state])
+
+       
+
 
     training = {}
     training['states'] = states_set
@@ -329,11 +337,13 @@ def run_fwd_bkw(observations_file,truth_file,training):
 
     # Feed each list of observations and truth data into viterbi
     # Do metrics calculations
+
     total_results = []
     total_truth = []
+    end_state = 'E'
     for i in range(len(obs)):
         print("Running line {0} of {1} in observation file...".format(i,len(obs)))
-        results = fwd_bkw(obs[i],training['states'],training['starts'],training['transitions'],training['emissions'])
+        results = fwd_bkw(obs[i],training['states'],training['starts'],training['transitions'],training['emissions'], end_state)
         newresults = []
         for result in results[1:len(results)-1]:
             newresults.append(float(result))
@@ -588,6 +598,7 @@ def main(argv):
 
         training = do_train(files['training_lengths'],files['training_states'])
         run_viterbi(files['observations'],files['truth_states'],training)
+        run_fwd_bkw(files['observations'],files['truth_states'],training)
 
         exit(0)
     
