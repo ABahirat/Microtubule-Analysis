@@ -325,7 +325,9 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
     returnList = []
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
     #print start_p
-    obs = [-99999.] + obs + [99999.]
+    print trans_p
+    print emit_p
+    obs = [-99999.] + obs[1:] + [99999.]
     print obs
     #print obs[0]
     #Calculate V0, x for all states x, where 0 is time
@@ -348,10 +350,10 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
             #v[t-1][prev_st]["prob"] is probability of being in prev_st at t-1
             #calculate previous time through loop
             #trans_p[prev_st][st] is transition probabilities
-            max_tr_prob = max(V[t-1][prev_st]["prob"]*trans_p[prev_st][st] for prev_st in states) #
+            max_prob = max(V[t-1][prev_st]["prob"]*trans_p[prev_st][st]*emit_p[st][obs[t]] for prev_st in states) #
             #print V[0]
             for prev_st in states: #incorporating evidence
-                if V[t-1][prev_st]["prob"] * trans_p[prev_st][st] == max_tr_prob:
+                if V[t-1][prev_st]["prob"] * trans_p[prev_st][st] * emit_p[st][obs[t]] == max_prob:
                     #emit_p[st][obs[t]] is emission probability of seeing observation in this state
                     #obst[t] is observation at time t
                     #print "emission prob: " + emit_p[st]
@@ -359,10 +361,12 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
                     #print(t)
                     #print(emit_p[st][obs[t]])
                     #print V[t]
-                    max_prob = max_tr_prob * emit_p[st][obs[t]]
+                    #max_prob = max_tr_prob * emit_p[st][obs[t]]
                     #store V for time t in state st
                     V[t][st] = {"prob": max_prob, "prev": prev_st}
                     break
+        print t
+        print V[t]
     for line in dptable(V):
         print line
 
