@@ -128,6 +128,7 @@ def bin(value):
         if(abs(new) < dist):
             best = bins[i]
             dist = abs(new)
+    #print str(value) + " -> " + str(best)
     return best
 
 ######################################################################################
@@ -154,6 +155,7 @@ def do_train(flengths, fstates):
             for line in states:
                 state_height += 1
                 state_matrix.append(line.split(','))
+
 
     if length_height != state_height or len(length_matrix[0]) != len(state_matrix[0]):
         print "matrices not same size"
@@ -209,7 +211,7 @@ def do_train(flengths, fstates):
                 state_data[state][state1] = 0
                 transition_prob[state][state1] = 0
 
-    print(lengths_set) # looks like .1 doesn't exist in this. 
+    print(lengths_set)
 
     for length in lengths_set:
         #if state not in length_data.keys() and state not in emission_prob.keys():
@@ -506,7 +508,7 @@ def main(argv):
         print("Algorithm:\t\t{0}".format(algo))
         print
 
-        training = do_train(files['training_states'],files['training_states'])
+        training = do_train(files['training_lengths'],files['training_states'])
         run_viterbi(files['observations'],files['truth_states'],training)
 
         exit(0)
