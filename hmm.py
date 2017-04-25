@@ -305,6 +305,50 @@ def run_viterbi(observations_file,truth_file,training):
     calculate_metrics(total_results, total_truth)
     return
 
+def run_fwd_bkw(observations_file,truth_file,training):
+    print("\nRunning Viterbi...")
+
+    # Open observation and truth data files
+    # Find diffences between previous values for obs
+    # Put into bins 
+    obs = []
+    with open(observations_file, 'r') as observations:
+        for line in observations:
+            obs_raw = line.split(',')
+            obs_diff = []
+            obs_diff.append(0)
+            for i in range(1,len(obs_raw)):
+                obs_diff.append(bin(float(obs_raw[i])-float(obs_raw[i-1])))
+            obs.append(obs_diff)
+
+    truth = []
+    with open(truth_file, 'r') as truth_data:
+        for line in truth_data:
+            truth_raw = line.split(',')
+            truth.append([float(i) for i in truth_raw])
+
+    # Feed each list of observations and truth data into viterbi
+    # Do metrics calculations
+    total_results = []
+    total_truth = []
+    for i in range(len(obs)):
+        print("Running line {0} of {1} in observation file...".format(i,len(obs)))
+        results = fwd_bkw(obs[i],training['states'],training['starts'],training['transitions'],training['emissions'])
+        newresults = []
+        for result in results[1:len(results)-1]:
+            newresults.append(float(result))
+        calculate_metrics(newresults, truth[i][:len(truth[i])-1])
+
+        total_results = total_results + newresults
+        total_truth = total_truth + truth[i][:len(truth[i])-1]
+
+    # Calculate total metric of viterbi
+    print("Calculating total accuracy...")
+    print total_results
+    print total_truth
+    calculate_metrics(total_results, total_truth)
+    return
+
 
 ######################################################################################
 #dptable function, used for printing dictionary
@@ -448,7 +492,8 @@ def fwd_bkw(observations, states, start_prob, trans_prob, emm_prob, end_st):
         posterior.append({st: fwd[i][st] * bkw[i][st] / p_fwd for st in states})
 
     assert p_fwd == p_bkw
-    return fwd, bkw, posterior
+    #return fwd, bkw, posterior
+    return posterior
 
 ######################################################################################
 # Calculate Metrics Function
