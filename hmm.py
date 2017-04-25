@@ -72,7 +72,7 @@ def handle_args(argv):
             print_usage()
             sys.exit()
         elif opt in ("-L", "-l"):
-            trainging_lengths_file = arg
+            training_lengths_file = arg
         elif opt in ("-S", "-s"):
             training_states_file = arg
         elif opt in ("-O", "-o"):
@@ -88,7 +88,7 @@ def handle_args(argv):
 
     files = {}
     files['training_lengths'] = training_lengths_file
-    files['training_states'] = training_lengths_file
+    files['training_states'] = training_states_file
     files['observations'] = observations_file
     files['truth_states'] = truth_states_file
 
@@ -135,6 +135,7 @@ def bin(value):
 #
 ######################################################################################
 def do_train(flengths, fstates):
+    print "Starting training..."
     pair_list = []
     length_matrix = []
     state_matrix = []
@@ -158,7 +159,7 @@ def do_train(flengths, fstates):
     for i in range(length_height-1):
         pair_list.append((-99999.,-99999)) # using -999 as start state/value
         for j in range(len(length_matrix[0])):
-            newlength = bin(length_matrix[i+1][j] - length_matrix[i][j]) #get diff of lengths and bin
+            newlength = bin(float(length_matrix[i+1][j]) - float(length_matrix[i][j])) #get diff of lengths and bin
             pair_list.append((newlength,state_matrix[i][j]))
         pair_list.append((99999.,99999)) # using 999 as end state/value
     
@@ -167,9 +168,9 @@ def do_train(flengths, fstates):
     transition_prob = {}
     emission_prob = {}
     start_prob = {}
-    states_data = {}
-    lengths_data = {}
-    states_count = {} #contains count of each state
+    state_data = {}
+    length_data = {}
+    state_count = {} #contains count of each state
     states_set = set()
     lengths_set = set()
 
@@ -240,10 +241,10 @@ def do_train(flengths, fstates):
             emission_prob[state][length] = float(length_data[length][state])/float(state_count[state])
 
     training = {}
-    training[states] = states_set
-    training[starts] = start_prob
-    training[transitions] = transition_prob
-    training[emissions] = emission_prob
+    training['states'] = states_set
+    training['starts'] = start_prob
+    training['transitions'] = transition_prob
+    training['emissions'] = emission_prob
     return training #returns a dictionary with set of states, and the start, transition and emission probabilities
 
 def train_hmm():
@@ -254,36 +255,41 @@ def train_hmm():
     return do_train(input_file,input_file2)
 
 def run_viterbi(observations_file,truth_file,training):
+    print("\nRunning Viterbi...")
 
     # Open observation and truth data files
     # Find diffences between previous values
     # Put into bins 
+    obs = []
     with open(observations_file, 'r') as observations:
         for line in observations:
-            temp = line.split()
-            temp2.append(0)
-            for i in range(1,len(temp)):
-                temp2.append(bin(temp[i]-temp[i-1]))
-            obs.append(temp2)
+            obs_raw = line.split(',')
+            obs_diff = []
+            obs_diff.append(0)
+            for i in range(1,len(obs_raw)):
+                obs_diff.append(bin(float(obs_raw[i])-float(obs_raw[i-1])))
+            obs.append(obs_diff)
 
+    truth = []
     with open(truth_file, 'r') as truth_data:
         for line in truth_data:
-            temp = line.split()
-            temp2.append(0)
-            for i in range(1,len(temp)):
-                temp2.append(bin(temp[i]-temp[i-1]))
-            truth.append(temp2)
+            truth_raw = line.split(',')
+            truth.append([float(i) for i in truth_raw])
 
     # Feed each list of observations and truth data into viterbi
     # Do metrics calculations
     total_results = []
+    total_truth = []
     for i in range(len(obs)):
-        results = viterbi(obs[i],training[states],training[start],training[transions],training[emissions])
+        print("Running line {0} of {1} in observation file...".format(i,len(obs)))
+        results = viterbi(obs[i],training['states'],training['starts'],training['transitions'],training['emissions'])
         calculate_metrics(results, truth[i])
+
         results_total = results_total + results
         truth_total = truth_total + truth[i]
 
     # Calculate total metric of viterbi
+    print("Calculating total accuracy...")
     calculate_metrics(results_total, truth_total)
 
 ######################################################################################
@@ -298,6 +304,7 @@ def run_viterbi(observations_file,truth_file,training):
 def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p all are dictionaries
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
     #Calculate V0, x for all states x, where 0 is time
+    print(states)
     for st in states:
         #index = 0
         #if obs[0] in emit_p[st]:
@@ -476,6 +483,7 @@ menu_actions = {
 #
 ######################################################################################
 def main(argv):
+    print("\n=== Program for using a hiddon markov model to do microtubule analysis ===\n")
     # Get command line arguments
     files,algo = handle_args(argv)
 
@@ -485,7 +493,7 @@ def main(argv):
         print("Training States File:\t{0}".format(files['training_states']))
         print("Observations_file:\t{0}".format(files['observations']))
         print("Truth States File:\t{0}".format(files['truth_states']))
-        print("Algorithm:\t{0}".format(algo))
+        print("Algorithm:\t\t{0}".format(algo))
         print
 
         training = do_train(files['training_states'],files['training_states'])
