@@ -301,6 +301,18 @@ def run_viterbi(observations_file,truth_file,training):
     calculate_metrics(results_total, truth_total)
     return
 
+
+######################################################################################
+#dptable function, used for printing dictionary
+######################################################################################
+
+def dptable(V):
+     # Print a table of steps from dictionary
+     yield " ".join(("%12d" % i) for i in range(len(V)))
+     for state in V[0]:
+         yield "%.7s: " % state + " ".join("%.7s" % ("%f" % v[state]["prob"]) for v in V)
+
+
 ######################################################################################
 # Viterbi Function
 # Source: https://en.wikipedia.org/wiki/Viterbi_algorithm
