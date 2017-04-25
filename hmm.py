@@ -206,12 +206,10 @@ def do_train(flengths, fstates):
         if state not in state_data.keys():
             state_data[state] = {}
             transition_prob[state] = {}
-            transition_prob_fwdbkw[state] = {}
         for state1 in states_set:
             if state1 not in state_data[state] and state1 not in transition_prob[state]: #if state combination does not exist
                 state_data[state][state1] = 0
                 transition_prob[state][state1] = 0
-                transition_prob_fwdbkw[state][state1] = 0
 
     print(lengths_set)
 
@@ -241,11 +239,9 @@ def do_train(flengths, fstates):
     print "Storing emission and transition probabilities... "
             
     for state in states_set:
-        transition_prob_fwdbkw[state]['E'] = float(0.01)
         for state1 in states_set:
             #if transition_prob[tag1][tag] == 0:
             transition_prob[state1][state] = float(state_data[state1][state])/float(state_count[state]) 
-            transition_prob_fwdbkw[state1][state] = float(state_data[state1][state])/float(state_count[state]) 
 
     for length in lengths_set:
         for state in states_set:
@@ -314,7 +310,7 @@ def run_viterbi(observations_file,truth_file,training):
     return
 
 def run_fwd_bkw(observations_file,truth_file,training):
-    print("\nRunning Viterbi...")
+    print("\nRunning Forward Backward...")
 
     # Open observation and truth data files
     # Find diffences between previous values for obs
@@ -329,6 +325,7 @@ def run_fwd_bkw(observations_file,truth_file,training):
                 obs_diff.append(bin(float(obs_raw[i])-float(obs_raw[i-1])))
             obs.append(obs_diff)
 
+
     truth = []
     with open(truth_file, 'r') as truth_data:
         for line in truth_data:
@@ -340,7 +337,7 @@ def run_fwd_bkw(observations_file,truth_file,training):
 
     total_results = []
     total_truth = []
-    end_state = 'E'
+    end_state = 99999
     for i in range(len(obs)):
         print("Running line {0} of {1} in observation file...".format(i,len(obs)))
         results = fwd_bkw(obs[i],training['states'],training['starts'],training['transitions'],training['emissions'], end_state)
