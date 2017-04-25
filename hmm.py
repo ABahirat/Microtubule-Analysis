@@ -293,12 +293,12 @@ def run_viterbi(observations_file,truth_file,training):
         results = viterbi(obs[i],training['states'],training['starts'],training['transitions'],training['emissions'])
         calculate_metrics(results, truth[i])
 
-        results_total = results_total + results
-        truth_total = truth_total + truth[i]
+        total_results = total_results + results
+        total_truth = total_truth + truth[i]
 
     # Calculate total metric of viterbi
     print("Calculating total accuracy...")
-    calculate_metrics(results_total, truth_total)
+    calculate_metrics(total_results, total_truth)
     return
 
 
@@ -323,6 +323,7 @@ def dptable(V):
 #
 ######################################################################################
 def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p all are dictionaries
+    returnList = []
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
     #Calculate V0, x for all states x, where 0 is time
     for st in states:
@@ -375,7 +376,12 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
         opt.insert(0, V[t + 1][previous]["prev"])
         previous = V[t + 1][previous]["prev"]
 
-    print 'The steps of states are ' + ' '.join(opt) + ' with highest probability of %s' % max_prob
+
+    returnList.append(str(opt))
+
+    print 'The steps of states are ' + ' '.join(str(opt)) + ' with highest probability of %s' % float(max_prob)
+
+    return returnList
     
 
 ######################################################################################
@@ -447,7 +453,7 @@ def calculate_metrics(results, truth_data):
     for i in range(results_len):
         if results[i] == truth_data[i]:
             correct += 1
-    accuracy = correct/results_len
+    accuracy = float(correct)/float(results_len)
     print("Overall Accuracy:\t{0}".format(accuracy))
 
     # Calculate f-measure
