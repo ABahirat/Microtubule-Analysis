@@ -37,7 +37,7 @@ from sklearn.metrics import f1_score, classification_report, confusion_matrix
 #
 ######################################################################################
 def print_usage():
-    print 'hmm.py -D <data file> -T <training file> -A <algorithm>'
+    print 'hmm.py -L <training lengths file> -S <training states file> -O <observations file> -T <truth states> -A <algorithm>'
     return
 
 ######################################################################################
@@ -50,29 +50,35 @@ def print_usage():
 ######################################################################################
 def handle_args(argv):
     try:
-        opts, args = getopt.getopt(argv,"hD:d:T:t:A:a:")
+        opts, args = getopt.getopt(argv,"hO:o:T:t:A:a:S:s:L:l")
     except getopt.GetoptError:
         print_usage()
         sys.exit(0)
 
-    if len(opts) != 4 and len(opts) != 0: # Needs two arguments to run
+    if len(opts) != 5 and len(opts) != 0: # Needs two arguments to run
         print(len(opts))
         print('Invalid number of arguments')
         print_usage()
         sys.exit(0)
 
-    data_file = None
-    training_file = None
+    training_lengths_file = None
+    training_states_file = None
+    observations_file = None
+    truth_states_file = None
     algorithm = None
 
     for opt, arg in opts:
         if opt == '-h':
             print_usage()
             sys.exit()
-        elif opt in ("-D", "-d"):
-            data_file = arg
+        elif opt in ("-L", "-l"):
+            trainging_lengths_file = arg
+        elif opt in ("-S", "-s"):
+            training_states_file = arg
+        elif opt in ("-O", "-o"):
+            observations_file = arg
         elif opt in ("-T", "-t"):
-            training_file = arg
+            truth_states_file = arg
         elif opt in ("-A", "-a"):
             algorithm = arg
         else:
@@ -80,7 +86,13 @@ def handle_args(argv):
             print_usage()
             exit(0)
 
-    return data_file, training_file, algorithm
+    files = {}
+    files['training_lengths'] = training_lengths_file
+    files['training_states'] = training_lengths_file
+    files['observations'] = observations_file
+    files['truth_states'] = truth_states_file
+
+    return files,algorithm
 
 ######################################################################################
 # Print Menu Options Function
@@ -241,12 +253,12 @@ def train_hmm():
     raw_input("Press enter to continue...")
     return do_train(input_file,input_file2)
 
-def run_viterbi(observations_file,truth_file):
+def run_viterbi(observations_file,truth_file,training):
 
     # Open observation and truth data files
     # Find diffences between previous values
     # Put into bins 
-    open(obs_file, 'r') as observations:
+    with open(observations_file, 'r') as observations:
         for line in observations:
             temp = line.split()
             temp2.append(0)
@@ -254,7 +266,7 @@ def run_viterbi(observations_file,truth_file):
                 temp2.append(bin(temp[i]-temp[i-1]))
             obs.append(temp2)
 
-    open(truth_file, 'r') as truth_data:
+    with open(truth_file, 'r') as truth_data:
         for line in truth_data:
             temp = line.split()
             temp2.append(0)
@@ -266,7 +278,7 @@ def run_viterbi(observations_file,truth_file):
     # Do metrics calculations
     total_results = []
     for i in range(len(obs)):
-        results = viterbi(obs[i], states, start_p, trans_p, emit_p)
+        results = viterbi(obs[i],training[states],training[start],training[transions],training[emissions])
         calculate_metrics(results, truth[i])
         results_total = results_total + results
         truth_total = truth_total + truth[i]
@@ -465,14 +477,20 @@ menu_actions = {
 ######################################################################################
 def main(argv):
     # Get command line arguments
-    data_file,trainging_file,algorithm  = handle_args(argv)
+    files,algo = handle_args(argv)
 
     # Run using arguments
-    if data_file:
-        print("Data File:\t{0}".format(data_file))
-        print("Training File:\t{0}".format(training_file))
-        print("Algorithm:\t{0}".format(algorithm))
+    if algo != None:
+        print("Training Lengths File:\t{0}".format(files['training_lengths']))
+        print("Training States File:\t{0}".format(files['training_states']))
+        print("Observations_file:\t{0}".format(files['observations']))
+        print("Truth States File:\t{0}".format(files['truth_states']))
+        print("Algorithm:\t{0}".format(algo))
         print
+
+        training = do_train(files['training_states'],files['training_states'])
+        run_viterbi(files['observations'],files['truth_states'],training)
+
         exit(0)
     
     # Run using menu
