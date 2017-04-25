@@ -91,9 +91,10 @@ def handle_args(argv):
 ######################################################################################
 def print_menu_options():
     print "HMM Microtubule Analysis"
+    print "0: Exit"
     print "1: Train"
     print "2: Viterbi"
-    print "3: Exit"
+    print "3: Forwards/Backwards"
     return
 
 ######################################################################################
@@ -166,7 +167,7 @@ def do_train(flengths, fstates):
         if state not in state_count.keys():
             stateCount = 0
             for length1, state1 in pair_list:
-                if state = state1:
+                if state == state1:
                     stateCount += 1
                 state_count[state] = stateCount
         states_set.add(state)
@@ -240,6 +241,39 @@ def train_hmm():
     raw_input("Press enter to continue...")
     return do_train(input_file,input_file2)
 
+def run_viterbi(observations_file,truth_file):
+
+    # Open observation and truth data files
+    # Find diffences between previous values
+    # Put into bins 
+    open(obs_file, 'r') as observations:
+        for line in observations:
+            temp = line.split()
+            temp2.append(0)
+            for i in range(1,len(temp)):
+                temp2.append(bin(temp[i]-temp[i-1]))
+            obs.append(temp2)
+
+    open(truth_file, 'r') as truth_data:
+        for line in truth_data:
+            temp = line.split()
+            temp2.append(0)
+            for i in range(1,len(temp)):
+                temp2.append(bin(temp[i]-temp[i-1]))
+            truth.append(temp2)
+
+    # Feed each list of observations and truth data into viterbi
+    # Do metrics calculations
+    total_results = []
+    for i in range(len(obs)):
+        results = viterbi(obs[i], states, start_p, trans_p, emit_p)
+        calculate_metrics(results, truth[i])
+        results_total = results_total + results
+        truth_total = truth_total + truth[i]
+
+    # Calculate total metric of viterbi
+    calculate_metrics(results_total, truth_total)
+
 ######################################################################################
 # Viterbi Function
 # Source: https://en.wikipedia.org/wiki/Viterbi_algorithm
@@ -299,6 +333,8 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
         previous = V[t + 1][previous]["prev"]
 
     print 'The steps of states are ' + ' '.join(opt) + ' with highest probability of %s' % max_prob
+    
+
 ######################################################################################
 # Forward/Backward Algorithm
 # Source: https://en.wikipedia.org/wiki/Forward-backward_algorithm
@@ -352,7 +388,7 @@ def fwd_bkw(observations, states, start_prob, trans_prob, emm_prob, end_st):
 
 ######################################################################################
 # Calculate Metrics Function
-#   
+#  Calculate the metrics of how well the the results match the truth data 
 #
 ######################################################################################s
 def calculate_metrics(results, truth_data):
@@ -411,10 +447,12 @@ menu_actions = {
         '2' : viterbi,
         'viterbi' : viterbi,
         'v' : viterbi,
-        '3' : exit_program,
+        '0' : exit_program,
         'exit' : exit_program,
         'q' : exit_program,
         'e' : exit_program,
+        '3' : fwd_bkw,
+        'fb' : fwd_bkw,
 }
 
 ######################################################################################
@@ -428,8 +466,6 @@ menu_actions = {
 def main(argv):
     # Get command line arguments
     data_file,trainging_file,algorithm  = handle_args(argv)
-
-
 
     # Run using arguments
     if data_file:
@@ -450,12 +486,6 @@ def main(argv):
         except KeyError:
             os.system('clear')
             print "Invalid selection, please try again.\n"
-
-    calculate_metrics([0,0,0,0,0,0,1,2,3],[0,1,0,3,0,0,1,2,3])
-    calculate_metrics([0,0,0],[0,1,0,3,0,0,1,2,3])
-    calculate_metrics([0,1,0,3,0,0,1,2,3],[0,1,0,3,0,0,1,2,3])
-    calculate_metrics([1,2,3,1,2,3,1,2,3],[1,2,3,1,2,3,1,2,3])
-
 
     return
 
