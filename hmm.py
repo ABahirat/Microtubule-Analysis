@@ -324,12 +324,17 @@ def dptable(V):
 def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p all are dictionaries
     returnList = []
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
+    #print start_p
+    obs = [-99999.] + obs + [99999.]
+    print obs
+    #print obs[0]
     #Calculate V0, x for all states x, where 0 is time
     for st in states:
         #index = 0
         #if obs[0] in emit_p[st]:
          #   index = emit_p[st][obs[0]]
-        V[0][st] = {"prob": start_p[st] * emit_p[st][obs[0]], "prev": None}
+        V[0][st] = {"prob": start_p[st], "prev": None}# * emit_p[st][obs[0]], "prev": None}
+        #print emit_p[st][obs[0]]
         #emit_p is pr(evidence | state), first dictionary contains key "prob" = start_pr for the state * emp_p for the state and "prev" none
         #obs is evidence at each time
         #obs[0] is Normal
@@ -344,14 +349,16 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
             #calculate previous time through loop
             #trans_p[prev_st][st] is transition probabilities
             max_tr_prob = max(V[t-1][prev_st]["prob"]*trans_p[prev_st][st] for prev_st in states) #
+            #print V[0]
             for prev_st in states: #incorporating evidence
                 if V[t-1][prev_st]["prob"] * trans_p[prev_st][st] == max_tr_prob:
                     #emit_p[st][obs[t]] is emission probability of seeing observation in this state
                     #obst[t] is observation at time t
-                    print(emit_p[st])
-                    print(obs[t])
-                    print(t)
-                    print(emit_p[st][obs[t]])
+                    #print "emission prob: " + emit_p[st]
+                    #print "obs: " + obs[t]
+                    #print(t)
+                    #print(emit_p[st][obs[t]])
+                    #print V[t]
                     max_prob = max_tr_prob * emit_p[st][obs[t]]
                     #store V for time t in state st
                     V[t][st] = {"prob": max_prob, "prev": prev_st}
