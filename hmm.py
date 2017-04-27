@@ -304,8 +304,8 @@ def run_viterbi(observations_file,truth_file,training):
 
     # Calculate total metric of viterbi
     print("Calculating total accuracy...")
-    print total_results
-    print total_truth
+    #print total_results
+    #print total_truth
     calculate_metrics(total_results, total_truth)
     return
 
@@ -421,10 +421,11 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
                     #store V for time t in state st
                     V[t][st] = {"prob": max_prob, "prev": prev_st}
                     break
-        print t
-        print V[t]
+        #print t
+        #print V[t]
     for line in dptable(V):
-        print line
+        #print line
+        pass
 
     opt = []
     # The highest probability
@@ -445,7 +446,7 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
 
     returnList.append(str(opt))
 
-    print 'The steps of states are ' + ' '.join(str(opt)) + ' with highest probability of %s' % float(max_prob)
+    #print 'The steps of states are ' + ' '.join(str(opt)) + ' with highest probability of %s' % float(max_prob)
 
     return opt #returnList
     
@@ -595,7 +596,7 @@ def main(argv):
 
         training = do_train(files['training_lengths'],files['training_states'])
         run_viterbi(files['observations'],files['truth_states'],training)
-        run_fwd_bkw(files['observations'],files['truth_states'],training)
+        #run_fwd_bkw(files['observations'],files['truth_states'],training)
 
         exit(0)
     
