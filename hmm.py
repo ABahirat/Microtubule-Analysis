@@ -160,10 +160,11 @@ def do_train(flengths, fstates):
         print "matrices not same size"
         exit(0)
 
-    for i in range(length_height-1):
+    for i in range(length_height):
         pair_list.append((-99999.,-99999)) # using -999 as start state/value
-        for j in range(len(length_matrix[0])):
-            newlength = bin(float(length_matrix[i+1][j]) - float(length_matrix[i][j])) #get diff of lengths and bin
+        for j in range(len(length_matrix[0])-1):
+            #print pair_list
+            newlength = bin(float(length_matrix[i][j+1]) - float(length_matrix[i][j])) #get diff of lengths and bin
             # no .1 are being set here
             pair_list.append((newlength,state_matrix[i][j]))
         pair_list.append((99999.,99999)) # using 999 as end state/value
@@ -299,6 +300,9 @@ def run_viterbi(observations_file,truth_file,training):
             newresults.append(float(result))
         calculate_metrics(newresults, truth[i][:len(truth[i])-1])
 
+        #print newresults
+        #print truth[i][:len(truth[i])-1]
+
         total_results = total_results + newresults
         total_truth = total_truth + truth[i][:len(truth[i])-1]
 
@@ -381,8 +385,8 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
     returnList = []
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
     #print start_p
-    #print trans_p
-    #print emit_p
+    print trans_p
+    print emit_p
     obs = [-99999.] + obs[1:] + [99999.]
     #print obs
     #print obs[0]
@@ -429,6 +433,7 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
 
     opt = []
     # The highest probability
+    print V[-1].values()
     max_prob = max(value["prob"] for value in V[-1].values())
     previous = None
     # Get most probable state and its backtrack
