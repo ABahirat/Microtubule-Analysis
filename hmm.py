@@ -120,7 +120,10 @@ def print_menu_options():
 #
 ######################################################################################
 def bin(value):
+    #bins = [-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3]
+    bins = [-0.2,0.0,0.2]
     bins = [-0.2,-0.1,0.0,0.1,0.2]
+    bins = [-.3,-0.2,-0.1,0.0,0.1,0.2,.3]
     best = 999999
     dist = 999999
     for i in range(len(bins)):
@@ -165,6 +168,7 @@ def do_train(flengths, fstates):
         for j in range(len(length_matrix[0])-1):
             #print pair_list
             newlength = bin(float(length_matrix[i][j+1]) - float(length_matrix[i][j])) #get diff of lengths and bin
+            #print(float(length_matrix[i][j+1]) - float(length_matrix[i][j])) #get diff of lengths and bin
             # no .1 are being set here
             pair_list.append((newlength,state_matrix[i][j]))
         pair_list.append((99999.,99999)) # using 999 as end state/value
