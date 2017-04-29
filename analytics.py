@@ -28,7 +28,7 @@ state_files.append('doubles_states_1.csv')
 state_files.append('doubles_states_2.csv')
 state_files.append('long_states.csv')
 
-def generate_state_distrobutions():
+def generate_state_distributions():
     # Calculate distrobutions in state files
     for state_file in state_files:
         
@@ -51,11 +51,11 @@ def generate_state_distrobutions():
         plt.bar(states_set, counts, align='center', alpha=0.5)
         plt.xticks(states_set)
         plt.xlabel('States')
-        plt.title('State Distrobution For File \''+state_file+'\'')
-        plt.savefig('plots/state_distrobutions/'+state_file+'_distrobution.png')
+        plt.title('State Distribution For File \''+state_file+'\'')
+        plt.savefig('plots/state_distributions/'+state_file+'_distribution.png')
         plt.clf() # clear figure
 
-def generate_length_distrobutions():
+def generate_length_distributions():
     # Calculate distrobutions in bin files
     for length_file in length_files:
         
@@ -88,17 +88,66 @@ def generate_length_distrobutions():
             plt.bar(x_position, counts, align='center', alpha=0.5)
             plt.xticks(x_position,lengths_set)
             plt.xlabel('Bins')
-            plt.title('Bin Distrobution For File \''+length_file_clean+'\' with bin '+str(bin_number))
-            plt.savefig('plots/length_distrobutions/'+length_file_clean+'_bin-'+str(bin_number)+'_distrobution.png')
+            plt.title('Bin Distribution For File \''+length_file_clean+'\' with bin '+str(bin_number))
+            plt.savefig('plots/length_distributions/'+length_file_clean+'_bin-'+str(bin_number)+'_distribution.png')
             plt.clf() # clear figure
 
             bin_number += 1
 
-def generate_length_state_distrobutions():
-    # This would do the same thing as 'generate_length_distrobutions()' except the bar graphs would have
+def generate_length_state_distributions():
+    # This would do the same thing as 'generate_length_distributions()' except the bar graphs would have
     # each of the bars made up of the number of each of the states it is made up of.
     # For example if 30 samples belonged to bin 0.0, the bar for that bin would be made up of 3 sections,
-    # one section for each possible state, showing how much of each of the things in that bin are made up of which states 
+    # one section for each possible state, showing how much of each of the things in that bin are made up of which states
+
+    for j in range(0, len(length_files)):
+
+        bin_number = 0
+        # Run every bin on each file
+        for data_bin in bins:
+            lengths = []
+            lengths.append(0)
+            # Get lengths from file
+            with open('data/'+length_files[j], 'r') as lf:
+                lengths_raw = []
+                for line in lf:
+                    length_raw  = line.split(',')
+                    for i in range(1,len(length_raw)): # Find differences between value before
+                        lengths = lengths + [hmm.bin(float(length_raw[i])-float(length_raw[i-1]),data_bin)]
+        
+            # Get states from file
+
+            states = []
+            with open('data/'+state_files[j], 'r') as sf:
+                states_raw = []
+                for line in sf:
+                    states_raw  = line.split(',')
+                    states = states + [int(i) for i in states_raw]
+                
+
+            # Get unqiue values in states to see what states possible
+            states_set = list(set(states))
+
+
+            bin_states = {}
+
+            for k in range(0,len(states)):
+                if bin_states.has_key(str(states[k]) + "." + str(lengths[k])):
+                    bin_states[str(states[k]) + "." + str(lengths[k])] =+ 1
+                else: 
+                    bin_states[str(states[k]) + "." + str(lengths[k])] = 1
+
+
+
+        
+
+
+        
+
+    print bin_states;
+
+
+
     return
 
 def generate_probability_tables():
@@ -136,11 +185,11 @@ def exit_program():
 
 def run_all():
     print("~Generating state distrobution plots...")
-    generate_state_distrobutions()
+    generate_state_distributions()
     print("~Generating length distrobution plots...")
-    generate_length_distrobutions()
+    generate_length_distributions()
     print("~Generating length state distrobution plots...")
-    generate_length_state_distrobutions()
+    generate_length_state_distributions()
     print("~Generating probability tables...")
     generate_probability_tables()
     print("~Generating bin accuracy plots...")
@@ -150,19 +199,19 @@ def run_all():
 def print_menu_options():
     print("---Analytics program for microtubule hmm project---")
     print("Menu Options:")
-    print("1: Generate State Distrobution Plots")
-    print("2: Generate Length Distrobution Plots")
-    print("3: Generate Length State  Distrobution Plots")
-    print("4: Generate Probability Tables Distrobution Plots")
-    print("5: Generate Generate Bin Distrobution Plots")
+    print("1: Generate State Distribution Plots")
+    print("2: Generate Length Distribution Plots")
+    print("3: Generate Length State Distribution Plots")
+    print("4: Generate Probability Tables Distribution Plots")
+    print("5: Generate Generate Bin Distribution Plots")
     print("6: Run All")
     print("0: Exit")
 
 menu_actions = {
     '0' : exit_program,
-    '1' : generate_state_distrobutions,
-    '2' : generate_length_distrobutions,
-    '3' : generate_length_state_distrobutions,
+    '1' : generate_state_distributions,
+    '2' : generate_length_distributions,
+    '3' : generate_length_state_distributions,
     '4' : generate_probability_tables,
     '5' : generate_bin_accuracy,
     '6' : run_all,
