@@ -266,8 +266,14 @@ def do_train(flengths, fstates):
 def train_hmm():
     input_file = raw_input("Input lengths file to use for training: ")
     raw_input("Press enter to continue...")
+    if not os.path.isfile(input_file):
+        print "File must exist"
+        sys.exit(2)
     input_file2 = raw_input("Input states file to use for training: ")
     raw_input("Press enter to continue...")
+    if not os.path.isfile(input_file2):
+        print "File must exist"
+        sys.exit(2)
     return do_train(input_file,input_file2)
 
 def run_viterbi(observations_file,truth_file,training):
