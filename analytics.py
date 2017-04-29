@@ -67,8 +67,12 @@ def generate_length_distributions():
             # Get lengths from file
             with open('data/'+length_file, 'r') as lf:
                 lengths_raw = []
+                previous_end = None
                 for line in lf:
                     length_raw  = line.split(',')
+                    if previous_end: # Handle the previous lines last value minus first value of new line
+                        lengths.append(hmm.bin(float(length_raw[0])-float(previous_end),data_bin))
+                    previous_end = length_raw[-1]
                     for i in range(1,len(length_raw)): # Find differences between value before
                         lengths = lengths + [hmm.bin(float(length_raw[i])-float(length_raw[i-1]),data_bin)]
 
@@ -110,8 +114,12 @@ def generate_length_state_distributions():
             # Get lengths from file
             with open('data/'+length_files[j], 'r') as lf:
                 lengths_raw = []
+                previous_end = None
                 for line in lf:
                     length_raw  = line.split(',')
+                    if previous_end: # Handle the previous lines last value minus first value of new line
+                        lengths.append(hmm.bin(float(length_raw[0])-float(previous_end),data_bin))
+                    previous_end = length_raw[-1]
                     for i in range(1,len(length_raw)): # Find differences between value before
                         lengths = lengths + [hmm.bin(float(length_raw[i])-float(length_raw[i-1]),data_bin)]
         
@@ -124,6 +132,8 @@ def generate_length_state_distributions():
                     states_raw  = line.split(',')
                     states = states + [int(i) for i in states_raw]
                 
+            print('data/'+state_files[j]+'={0}'.format(len(states)))
+            print('data/'+length_files[j]+'={0}'.format(len(lengths)))
 
             # Get unqiue values in states to see what states possible
             states_set = list(set(states))
