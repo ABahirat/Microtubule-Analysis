@@ -119,11 +119,8 @@ def print_menu_options():
 #   Returns binned float
 #
 ######################################################################################
-def bin(value):
-    #bins = [-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3]
-    bins = [-0.2,0.0,0.2]
-    bins = [-0.2,-0.1,0.0,0.1,0.2]
-    bins = [-.3,-0.2,-0.1,0.0,0.1,0.2,.3]
+def bin(value,bin_list):
+    bins = bin_list
     best = 999999
     dist = 999999
     for i in range(len(bins)):
@@ -141,7 +138,7 @@ def bin(value):
 #   Returns training probabilities
 #
 ######################################################################################
-def do_train(flengths, fstates):
+def do_train(flengths, fstates, bin_list):
     print "Starting training..."
     pair_list = []
     length_matrix = []
@@ -167,7 +164,7 @@ def do_train(flengths, fstates):
         pair_list.append((-99999.,-99999)) # using -999 as start state/value
         for j in range(len(length_matrix[0])-1):
             #print pair_list
-            newlength = bin(float(length_matrix[i][j+1]) - float(length_matrix[i][j])) #get diff of lengths and bin
+            newlength = bin(float(length_matrix[i][j+1]) - float(length_matrix[i][j]),bin_list) #get diff of lengths and bin
             #print(float(length_matrix[i][j+1]) - float(length_matrix[i][j])) #get diff of lengths and bin
             # no .1 are being set here
             pair_list.append((newlength,state_matrix[i][j]))
@@ -215,8 +212,6 @@ def do_train(flengths, fstates):
             if state1 not in state_data[state] and state1 not in transition_prob[state]: #if state combination does not exist
                 state_data[state][state1] = 0
                 transition_prob[state][state1] = 0
-
-    print(lengths_set)
 
     for length in lengths_set:
         #if state not in length_data.keys() and state not in emission_prob.keys():
@@ -276,7 +271,7 @@ def train_hmm():
         sys.exit(2)
     return do_train(input_file,input_file2)
 
-def run_viterbi(observations_file,truth_file,training):
+def run_viterbi(observations_file,truth_file,training,bin_list):
     print("\nRunning Viterbi...")
 
     # Open observation and truth data files
@@ -289,7 +284,7 @@ def run_viterbi(observations_file,truth_file,training):
             obs_diff = []
             obs_diff.append(0)
             for i in range(1,len(obs_raw)):
-                obs_diff.append(bin(float(obs_raw[i])-float(obs_raw[i-1])))
+                obs_diff.append(bin(float(obs_raw[i])-float(obs_raw[i-1]),bin_list))
             obs.append(obs_diff)
 
     truth = []
@@ -318,8 +313,6 @@ def run_viterbi(observations_file,truth_file,training):
 
     # Calculate total metric of viterbi
     print("Calculating total accuracy...")
-    #print total_results
-    #print total_truth
     calculate_metrics(total_results, total_truth)
     return
 
@@ -609,8 +602,15 @@ def main(argv):
         print("Algorithm:\t\t{0}".format(algo))
         print
 
-        training = do_train(files['training_lengths'],files['training_states'])
-        run_viterbi(files['observations'],files['truth_states'],training)
+        bins = [-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3]
+        #bins = [-0.2,0.0,0.2]
+        #bins = [-0.2,-0.1,0.0,0.1,0.2]
+        #bins = [-.3,-0.2,-0.1,0.0,0.1,0.2,.3]
+
+        bin_list = bins
+
+        training = do_train(files['training_lengths'],files['training_states'],bin_list)
+        run_viterbi(files['observations'],files['truth_states'],training,bin_list)
         #run_fwd_bkw(files['observations'],files['truth_states'],training)
 
         exit(0)

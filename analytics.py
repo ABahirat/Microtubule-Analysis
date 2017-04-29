@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import os
+import hmm
 
 # Initialize different types of bins
 bins = []
@@ -26,17 +27,6 @@ state_files.append('singles_states_2.csv')
 state_files.append('doubles_states_1.csv')
 state_files.append('doubles_states_2.csv')
 state_files.append('long_states.csv')
-
-# Binning function to round values into bins
-def bin(value,bins):
-    best = 999999
-    dist = 999999
-    for i in range(len(bins)):
-        new = abs(bins[i] - value)
-        if(abs(new) < dist):
-            best = bins[i]
-            dist = abs(new)
-    return best
 
 def generate_state_distrobutions():
     # Calculate distrobutions in state files
@@ -80,7 +70,7 @@ def generate_length_distrobutions():
                 for line in lf:
                     length_raw  = line.split(',')
                     for i in range(1,len(length_raw)): # Find differences between value before
-                        lengths = lengths + [bin(float(length_raw[i])-float(length_raw[i-1]),data_bin)]
+                        lengths = lengths + [hmm.bin(float(length_raw[i])-float(length_raw[i-1]),data_bin)]
 
             # Get possible bins
             lengths_set = data_bin
@@ -113,10 +103,31 @@ def generate_length_state_distrobutions():
 
 def generate_probability_tables():
     # Generate nice looking emission and transion probability tables
+
+    bin_number = 0
+    # Run every bin on each file
+    for data_bin in bins:
+        for i in range(len(length_files)):
+            training = hmm.do_train('data/'+length_files[i],'data/'+state_files[i],data_bin)
+            
+            emissions = training['emissions']
+            transitions = training['transitions']
+
+            del emissions[99999]
+            del emissions[-99999]
+            del transitions[99999]
+            del transitions[-99999]
+
+        bin_number += 1
     return
 
 def generate_bin_accuracy():
-    # Generate plots showing viterbi accuracy of each bin
+    # Generate plots showing viterbi accuracy vs each bin
+
+    bin_number = 0
+    # Run every bin on each file
+    for data_bin in bins:
+        bin_number += 1
     return
 
 def exit_program():
