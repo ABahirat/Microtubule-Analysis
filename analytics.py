@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import os
 import hmm
+import numpy as np
+import matplotlib.patches as mpatches
 
 # Initialize different types of bins
 bins = []
@@ -141,11 +143,15 @@ def generate_length_state_distributions():
 
             bin_states = {}
 
+            for k in range(0, len(states)):
+                bin_states[lengths[k]] = {}
+                bin_states[lengths[k]][0] = 0
+                bin_states[lengths[k]][1] = 0
+                bin_states[lengths[k]][2] = 0
+
             for k in range(0,len(states)):
-                if bin_states.has_key(str(states[k]) + "." + str(lengths[k])):
-                    bin_states[str(states[k]) + "." + str(lengths[k])] += 1
-                else: 
-                    bin_states[str(states[k]) + "." + str(lengths[k])] = 1
+                bin_states[lengths[k]][states[k]] += 1
+
 
 
 
@@ -153,20 +159,58 @@ def generate_length_state_distributions():
             length_file_clean = length_files[j][:-4]
             state_file = state_files[j][:-4]
 
+            lengths_set = data_bin
+            x_position = list(range(0,len(lengths_set)))
 
-            print bin_states.values()
 
+            #print bin_states;
+            n_groups = len(x_position)
+            opacity = 0.4
+            bar_width = 0.35
+            index = np.arange(n_groups)
+            zero_state_list = []
+            one_state_list = []
+            two_state_list = []
+        
+
+            for key in bin_states:
+                zero_state_list.append(bin_states[key][0])
+                one_state_list.append(bin_states[key][1]) 
+                two_state_list.append(bin_states[key][2])
+
+            print zero_state_list
+            print one_state_list
+            print two_state_list
             
-            plt.bar(range(len(bin_states)), bin_states.values(), align='center')
-            plt.xticks(range(len(bin_states)),bin_states.keys())
+
+            rects1 = plt.bar(index, zero_state_list, bar_width,
+                 alpha=opacity,
+                 color='b',
+                 label='state 0')
+
+            rects2 = plt.bar(index + bar_width, one_state_list, bar_width,
+                 alpha=opacity,
+                 color='r',
+                 label='state 1')
+
+            rects3 = plt.bar(index + 2*bar_width, two_state_list, bar_width,
+                 alpha=opacity,
+                 color='g',
+                 label='state 2')
+
             plt.xlabel('Bins')
+            plt.ylabel('Count')
+            plt.xticks(index + bar_width / 3, data_bin)
+            plt.legend()
             plt.title('State Distribution For File \''+length_file_clean+'\' with bin '+str(bin_number))
             plt.savefig('plots/length_state_distributions/'+length_file_clean+'_bin-'+str(bin_number)+'_distribution.png')
+            #plt.tight_layout()
             plt.clf() # clear figure
             bin_number += 1
+            
+        break;
 
-
-        
+    print bin_states
 
 
 
