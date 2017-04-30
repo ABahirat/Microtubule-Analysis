@@ -257,7 +257,7 @@ def generate_probability_tables():
             ax = fig.add_subplot(111)
             ax.axis('off')
 
-            plt.title('Probability table for \''+length_file_clean+'/'+state_file_clean+'\' with bin '+str(bin_number))
+            plt.title('Emission probability table for \''+length_file_clean+'/'+state_file_clean+'\' with bin '+str(bin_number))
             the_table = ax.table(cellText=cell_text,
                               colLabels=columns,
                               rowLabels=rows,
@@ -266,6 +266,38 @@ def generate_probability_tables():
             plt.savefig('plots/probability_tables/emission_'+length_file_clean+'-'+state_file_clean+'_bin-'+str(bin_number)+'.png')
             plt.clf() # clear figure
 
+            print("Building transition tables...")
+            rows = []
+            cell_text = []
+            for key in transitions:
+                rows.append(key)
+                columns = []
+                values = []
+                del transitions[key][99999]
+                del transitions[key][-99999]
+                for key2 in transitions[key]:
+                    columns.append(key2)
+                    values = values + [transitions[key][key2]]
+                cell_text.append(values)
+
+            length_file_clean = length_files[i][:-4]
+            state_file_clean = state_files[i][:-4]
+
+            nrows, ncols = len(rows)+1, len(columns)
+            hcell, wcell = 1.3, 2.
+            hpad, wpad = 1, 1    
+            fig=plt.figure(figsize=(ncols*wcell+wpad, nrows*hcell+hpad))
+            ax = fig.add_subplot(111)
+            ax.axis('off')
+
+            plt.title('Transition probability table for \''+length_file_clean+'/'+state_file_clean+'\'')
+            the_table = ax.table(cellText=cell_text,
+                              colLabels=columns,
+                              rowLabels=rows,
+                              loc='center')
+            #plt.show()
+            plt.savefig('plots/probability_tables/transition_'+length_file_clean+'-'+state_file_clean+'.png')
+            plt.clf() # clear figure
         bin_number += 1
     return
 
