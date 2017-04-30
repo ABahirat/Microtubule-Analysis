@@ -142,31 +142,31 @@ def generate_length_state_distributions():
 
 
             bin_states = {}
+            lengths_set = data_bin
 
-            for k in range(0, len(states)):
-                bin_states[lengths[k]] = {}
-                bin_states[lengths[k]][0] = 0
-                bin_states[lengths[k]][1] = 0
-                bin_states[lengths[k]][2] = 0
+            for k in range(0, len(lengths_set)):
+                bin_states[lengths_set[k]] = {}
+                bin_states[lengths_set[k]][0] = 0
+                bin_states[lengths_set[k]][1] = 0
+                bin_states[lengths_set[k]][2] = 0
 
             for k in range(0,len(states)):
                 bin_states[lengths[k]][states[k]] += 1
-
-
 
 
             # Remove .csv form name
             length_file_clean = length_files[j][:-4]
             state_file = state_files[j][:-4]
 
-            lengths_set = data_bin
+            
+            
             x_position = list(range(0,len(lengths_set)))
 
 
             #print bin_states;
             n_groups = len(x_position)
-            opacity = 0.4
-            bar_width = 0.35
+            opacity = 0.7
+            bar_width = 0.25
             index = np.arange(n_groups)
             zero_state_list = []
             one_state_list = []
@@ -178,9 +178,7 @@ def generate_length_state_distributions():
                 one_state_list.append(bin_states[key][1]) 
                 two_state_list.append(bin_states[key][2])
 
-            print zero_state_list
-            print one_state_list
-            print two_state_list
+            
             
 
             rects1 = plt.bar(index, zero_state_list, bar_width,
@@ -200,7 +198,7 @@ def generate_length_state_distributions():
 
             plt.xlabel('Bins')
             plt.ylabel('Count')
-            plt.xticks(index + bar_width / 3, data_bin)
+            plt.xticks(index + 2*bar_width / 2, data_bin)
             plt.legend()
             plt.title('State Distribution For File \''+length_file_clean+'\' with bin '+str(bin_number))
             plt.savefig('plots/length_state_distributions/'+length_file_clean+'_bin-'+str(bin_number)+'_distribution.png')
@@ -208,9 +206,7 @@ def generate_length_state_distributions():
             plt.clf() # clear figure
             bin_number += 1
             
-        break;
-
-    print bin_states
+    
 
 
 
