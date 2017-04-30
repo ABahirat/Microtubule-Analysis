@@ -313,8 +313,8 @@ def run_viterbi(observations_file,truth_file,training,bin_list):
 
     # Calculate total metric of viterbi
     print("Calculating total accuracy...")
-    calculate_metrics(total_results, total_truth)
-    return
+    accuracy,f1_macro,f1_weighted = calculate_metrics(total_results, total_truth)
+    return accuracy, f1_macro,f1_weighted
 
 def run_fwd_bkw(observations_file,truth_file,training):
     print("\nRunning Forward Backward...")
@@ -549,7 +549,7 @@ def calculate_metrics(results, truth_data):
 
     print("\nFinished results!")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    return
+    return accuracy, f1_macro, f1_weighted
 
 ######################################################################################
 # Exit Program Function

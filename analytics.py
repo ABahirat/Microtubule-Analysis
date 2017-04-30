@@ -215,6 +215,10 @@ def generate_length_state_distributions():
 def generate_probability_tables():
     # Generate nice looking emission and transion probability tables
 
+    if(len(length_files) != len(state_files)):
+        print("Need same number of states and lengths files")
+        return
+
     bin_number = 0
     # Run every bin on each file
     for data_bin in bins:
@@ -268,10 +272,70 @@ def generate_probability_tables():
 def generate_bin_accuracy():
     # Generate plots showing viterbi accuracy vs each bin
 
-    bin_number = 0
-    # Run every bin on each file
-    for data_bin in bins:
-        bin_number += 1
+    colors = ['#DAF7A6','#FFC300','#FF5733','#C70039','#900C3F','#48C9B0','#A551CF','#16A085','#AEB6BF','#515A5A']
+
+    if(len(length_files) < 2):
+        print("Need to provide at least two sets of data, one for training and one for testing")
+        return
+    if(len(state_files) < 2):
+        print("Need to provide at least two sets of data, one for training and one for testing")
+        return
+    if(len(length_files) != len(state_files)):
+        print("Need same number of states and lengths files")
+        return
+
+    length = len(length_files)
+    if length % 2 == 1:
+        length -= 1
+    
+    for i in range(0,length,2):
+        training_lengths_file = 'data/'+length_files[i]
+        testing_lengths_file = 'data/'+length_files[i+1]
+        training_states_file = 'data/'+state_files[i]
+        testing_states_file = 'data/'+state_files[i+1]
+
+
+        fig = plt.figure(1)
+        ax = plt.gca()
+        fig2 = plt.figure(2)
+        ax2 = plt.gca()
+        bin_number = 0
+        # Run every bin on each file
+        for data_bin in bins:
+            training = hmm.do_train(training_lengths_file,training_states_file,data_bin)
+            accuracy,f1_macro,f1_weighted = hmm.run_viterbi(testing_lengths_file,testing_states_file,training,data_bin)
+
+            ax.scatter(len(data_bin),accuracy, c=colors[bin_number], label='bin '+str(bin_number))
+            ax2.scatter(len(data_bin),f1_weighted, c=colors[bin_number], label='bin '+str(bin_number))
+
+            bin_number += 1
+
+        training_lengths = length_files[i][:-4]
+        training_states = state_files[i][:-4]
+        testing_lengths = length_files[i+1][:-4]
+        testing_states = state_files[i+1][:-4]
+
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        box = ax2.get_position()
+        ax2.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend()
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        ax2.legend()
+        plt.figure(1)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+        plt.title('Bin Size vs. Accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Bin Size')
+        plt.savefig('plots/bin_accuracy/accuracy_train-'+training_lengths+'-'+training_states+'_test-'+testing_lengths+'-'+testing_states+'.png')
+        plt.clf()
+        plt.figure(2)
+        plt.title('Bin Size vs. F-Measure')
+        plt.ylabel('F-Meausre')
+        plt.xlabel('Bin Size')
+        plt.savefig('plots/bin_accuracy/fmeasure_train-'+training_lengths+'-'+training_states+'_test-'+testing_lengths+'-'+testing_states+'.png')
+        #plt.show()
+        plt.clf()
     return
 
 def exit_program():
