@@ -3,6 +3,7 @@ import os
 import hmm
 import numpy as np
 import matplotlib.patches as mpatches
+import collections
 
 # Initialize different types of bins
 bins = []
@@ -171,15 +172,18 @@ def generate_length_state_distributions():
             zero_state_list = []
             one_state_list = []
             two_state_list = []
-        
+            orderedList = []
 
             for key in bin_states:
+                orderedList.append(key)
+            
+            orderedList.sort()
+
+            for key in orderedList:
                 zero_state_list.append(bin_states[key][0])
                 one_state_list.append(bin_states[key][1]) 
                 two_state_list.append(bin_states[key][2])
 
-            
-            
 
             rects1 = plt.bar(index, zero_state_list, bar_width,
                  alpha=opacity,
