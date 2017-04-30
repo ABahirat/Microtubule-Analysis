@@ -143,18 +143,30 @@ def generate_length_state_distributions():
 
             for k in range(0,len(states)):
                 if bin_states.has_key(str(states[k]) + "." + str(lengths[k])):
-                    bin_states[str(states[k]) + "." + str(lengths[k])] =+ 1
+                    bin_states[str(states[k]) + "." + str(lengths[k])] += 1
                 else: 
                     bin_states[str(states[k]) + "." + str(lengths[k])] = 1
 
 
 
-        
+            # Remove .csv form name
+            length_file_clean = length_files[j][:-4]
+            state_file = state_files[j][:-4]
+
+
+            print bin_states.values()
+
+            
+            plt.bar(range(len(bin_states)), bin_states.values(), align='center')
+            plt.xticks(range(len(bin_states)),bin_states.keys())
+            plt.xlabel('Bins')
+            plt.title('State Distribution For File \''+length_file_clean+'\' with bin '+str(bin_number))
+            plt.savefig('plots/length_state_distributions/'+length_file_clean+'_bin-'+str(bin_number)+'_distribution.png')
+            plt.clf() # clear figure
+            bin_number += 1
 
 
         
-
-    print bin_states;
 
 
 
