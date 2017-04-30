@@ -3,13 +3,13 @@ TODO:
 'X' means done, '-' Means needs to be done
 
 X Make analytics into menu system
-- Make viterbi be able to run in other python files (analytics.py)
+X Make viterbi be able to run in other python files (analytics.py)
 - Make viterbi be able to be run without truth data for when run on real data
 - Write length state plot generation
 - Write probability table generation
 - Write bin accuracy plot generation (bin size vs. accuracy)
 - Be able to handle bin as command line argument (?)
 - Run patricks new data with realistic noise
-- Remove hemu system from hmm.py (?)
+- Remove menu system from hmm.py (?)
 - Add basic documentation on how to run things
 - Clean. Sounds like patricks lab will be using this code so needs to be cleaned a lil

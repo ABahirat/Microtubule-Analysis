@@ -189,6 +189,39 @@ def generate_probability_tables():
             del transitions[99999]
             del transitions[-99999]
 
+            print("Building emission tables...")
+            rows = []
+            cell_text = []
+            for key in emissions:
+                rows.append(key)
+                columns = []
+                values = []
+                del emissions[key][99999]
+                del emissions[key][-99999]
+                for key2 in emissions[key]:
+                    columns.append(key2)
+                    values = values + [emissions[key][key2]]
+                cell_text.append(values)
+
+            length_file_clean = length_files[i][:-4]
+            state_file_clean = state_files[i][:-4]
+
+            nrows, ncols = len(rows)+1, len(columns)
+            hcell, wcell = 1.3, 2.
+            hpad, wpad = 1, 1    
+            fig=plt.figure(figsize=(ncols*wcell+wpad, nrows*hcell+hpad))
+            ax = fig.add_subplot(111)
+            ax.axis('off')
+
+            plt.title('Probability table for \''+length_file_clean+'/'+state_file_clean+'\' with bin '+str(bin_number))
+            the_table = ax.table(cellText=cell_text,
+                              colLabels=columns,
+                              rowLabels=rows,
+                              loc='center')
+            #plt.show()
+            plt.savefig('plots/probability_tables/emission_'+length_file_clean+'-'+state_file_clean+'_bin-'+str(bin_number)+'.png')
+            plt.clf() # clear figure
+
         bin_number += 1
     return
 
