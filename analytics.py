@@ -19,17 +19,31 @@ bins.append([-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3])
 length_files = []
 length_files.append('singles_lengths_1.csv')
 length_files.append('singles_lengths_2.csv')
-length_files.append('doubles_lengths_1.csv')
-length_files.append('doubles_lengths_2.csv')
-length_files.append('long_lengths.csv')
+length_files.append('bundles_lengths_1.csv')
+length_files.append('bundles_lengths_2.csv')
+length_files.append('singles_lengths_noise_1.csv')
+length_files.append('singles_lengths_noise_2.csv')
+length_files.append('bundles_lengths_noise_1.csv')
+length_files.append('bundles_lengths_noise_2.csv')
+length_files.append('singles_lengths_noise_3.csv')
+length_files.append('singles_lengths_noise_4.csv')
+length_files.append('bundles_lengths_noise_3.csv')
+length_files.append('bundles_lengths_noise_4.csv')
 
 # Set different state files
 state_files = []
 state_files.append('singles_states_1.csv')
 state_files.append('singles_states_2.csv')
-state_files.append('doubles_states_1.csv')
-state_files.append('doubles_states_2.csv')
-state_files.append('long_states.csv')
+state_files.append('bundles_states_1.csv')
+state_files.append('bundles_states_2.csv')
+state_files.append('singles_states_1.csv')
+state_files.append('singles_states_2.csv')
+state_files.append('bundles_states_1.csv')
+state_files.append('bundles_states_2.csv')
+state_files.append('singles_states_1.csv')
+state_files.append('singles_states_2.csv')
+state_files.append('bundles_states_1.csv')
+state_files.append('bundles_states_2.csv')
 
 def generate_state_distributions():
     # Calculate distrobutions in state files
