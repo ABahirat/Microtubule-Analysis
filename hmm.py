@@ -14,11 +14,7 @@
 #   -O specifies observation file to run algorithm on
 #   -T specifies the truth data to check the algorithm against
 #   -A specifies the algorithm to run
-#
-######################################################################################
-#   
-#   Algorithm Explanation: 
-#       
+#   -B specifies the bins to use for observations
 #
 ######################################################################################
 # 
@@ -40,7 +36,7 @@ from sklearn.metrics import f1_score, classification_report, confusion_matrix
 #
 ######################################################################################
 def print_usage():
-    print 'hmm.py -L <training lengths file> -S <training states file> -O <observations file> -T <truth states> -A <algorithm>'
+    print 'hmm.py -L <training lengths file> -S <training states file> -O <observations file> -T <truth states> -A <algorithm> -B <bins>'
     return
 
 ######################################################################################
@@ -53,14 +49,14 @@ def print_usage():
 ######################################################################################
 def handle_args(argv):
     try:
-        opts, args = getopt.getopt(argv,"hO:o:T:t:A:a:S:s:L:l")
+        opts, args = getopt.getopt(argv,"hO:o:T:t:A:a:S:s:L:l:B:b")
     except getopt.GetoptError:
         print_usage()
         sys.exit(0)
 
-    if len(opts) != 5 and len(opts) != 0: # Needs two arguments to run
-        print(len(opts))
+    if len(opts) != 6:
         print('Invalid number of arguments')
+        print('Expected 6 arguments, got {0}'.format(len(opts)))
         print_usage()
         sys.exit(0)
 
@@ -69,6 +65,7 @@ def handle_args(argv):
     observations_file = None
     truth_states_file = None
     algorithm = None
+    bins = None
 
     for opt, arg in opts:
         if opt == '-h':
@@ -84,6 +81,9 @@ def handle_args(argv):
             truth_states_file = arg
         elif opt in ("-A", "-a"):
             algorithm = arg
+        elif opt in ("-B", "-b"):
+            bins = arg.split(',')
+            bins = [float(i) for i in bins]
         else:
             print("Unknown argument option: {0}".format(opt))
             print_usage()
@@ -95,7 +95,7 @@ def handle_args(argv):
     files['observations'] = observations_file
     files['truth_states'] = truth_states_file
 
-    return files,algorithm
+    return files,algorithm,bins
 
 ######################################################################################
 # Print Menu Options Function
@@ -258,6 +258,13 @@ def do_train(flengths, fstates, bin_list):
     training['emissions'] = emission_prob
     return training #returns a dictionary with set of states, and the start, transition and emission probabilities
 
+######################################################################################
+# Train HMM Function
+#   Setup for training hmm
+#
+#   Returns training probabilities
+#
+######################################################################################
 def train_hmm():
     input_file = raw_input("Input lengths file to use for training: ")
     raw_input("Press enter to continue...")
@@ -271,6 +278,13 @@ def train_hmm():
         sys.exit(2)
     return do_train(input_file,input_file2)
 
+######################################################################################
+# Train HMM Function
+#   Set up from running viterbi
+#
+#   Returns total accuracy and f scores
+#
+######################################################################################
 def run_viterbi(observations_file,truth_file,training,bin_list):
     print("\nRunning Viterbi...")
 
@@ -316,6 +330,15 @@ def run_viterbi(observations_file,truth_file,training,bin_list):
     accuracy,f1_macro,f1_weighted = calculate_metrics(total_results, total_truth)
     return accuracy, f1_macro,f1_weighted
 
+######################################################################################
+# Train HMM Function
+#   Set up for running forward backward
+#
+#   NOT CURRENTLY WORKING
+#
+#   Returns training probabilities
+#
+######################################################################################
 def run_fwd_bkw(observations_file,truth_file,training):
     print("\nRunning Forward Backward...")
 
@@ -381,7 +404,7 @@ def dptable(V):
 #   Runs viterbi using previously calculated probabilities
 #   Prints out accuracy calculations
 #
-#   Returns None
+#   Returns list of predicted states
 #
 ######################################################################################
 def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p all are dictionaries
@@ -463,6 +486,8 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
 # Forward/Backward Algorithm
 # Source: https://en.wikipedia.org/wiki/Forward-backward_algorithm
 #
+#   NOT CURRENTLY WORKING!
+#
 #
 ######################################################################################
 def fwd_bkw(observations, states, start_prob, trans_prob, emm_prob, end_st):
@@ -515,6 +540,8 @@ def fwd_bkw(observations, states, start_prob, trans_prob, emm_prob, end_st):
 # Calculate Metrics Function
 #  Calculate the metrics of how well the the results match the truth data 
 #
+#  Returns accuracy and f1 scores
+#
 ######################################################################################s
 def calculate_metrics(results, truth_data):
     if len(results) != len(truth_data):
@@ -551,34 +578,6 @@ def calculate_metrics(results, truth_data):
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     return accuracy, f1_macro, f1_weighted
 
-######################################################################################
-# Exit Program Function
-#   Exits program
-#
-######################################################################################
-def exit_program():
-    print "Exiting!"
-    exit()
-
-######################################################################################
-# Menu Actions Dictionary
-#   Options for input into main menu
-#
-######################################################################################
-menu_actions = {
-        '1' : train_hmm,
-        'train' : train_hmm,
-        't' : train_hmm,
-        '2' : viterbi,
-        'viterbi' : viterbi,
-        'v' : viterbi,
-        '0' : exit_program,
-        'exit' : exit_program,
-        'q' : exit_program,
-        'e' : exit_program,
-        '3' : fwd_bkw,
-        'fb' : fwd_bkw,
-}
 
 ######################################################################################
 # Main Function
@@ -591,42 +590,19 @@ menu_actions = {
 def main(argv):
     print("\n=== Program for using a hiddon markov model to do microtubule analysis ===\n")
     # Get command line arguments
-    files,algo = handle_args(argv)
+    files,algo,bins = handle_args(argv)
 
-    # Run using arguments
-    if algo != None:
-        print("Training Lengths File:\t{0}".format(files['training_lengths']))
-        print("Training States File:\t{0}".format(files['training_states']))
-        print("Observations_file:\t{0}".format(files['observations']))
-        print("Truth States File:\t{0}".format(files['truth_states']))
-        print("Algorithm:\t\t{0}".format(algo))
-        print
+    print("Training Lengths File:\t{0}".format(files['training_lengths']))
+    print("Training States File:\t{0}".format(files['training_states']))
+    print("Observations_file:\t{0}".format(files['observations']))
+    print("Truth States File:\t{0}".format(files['truth_states']))
+    print("Algorithm:\t\t{0}".format(algo))
+    print
 
-        bins = [-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3]
-        #bins = [-0.2,0.0,0.2]
-        #bins = [-0.2,-0.1,0.0,0.1,0.2]
-        #bins = [-.3,-0.2,-0.1,0.0,0.1,0.2,.3]
-
-        bin_list = bins
-
-        training = do_train(files['training_lengths'],files['training_states'],bin_list)
-        run_viterbi(files['observations'],files['truth_states'],training,bin_list)
-        #run_fwd_bkw(files['observations'],files['truth_states'],training)
-
-        exit(0)
+    training = do_train(files['training_lengths'],files['training_states'],bins)
+    run_viterbi(files['observations'],files['truth_states'],training,bins)
+    ###run_fwd_bkw(files['observations'],files['truth_states'],training)
     
-    # Run using menu
-    os.system('clear')
-    while True:
-        print_menu_options()
-        choice = raw_input(">>  ")
-        try:
-            menu_actions[choice]()
-            os.system('clear')
-        except KeyError:
-            os.system('clear')
-            print "Invalid selection, please try again.\n"
-
     return
 
 ######################################################################################
