@@ -9,12 +9,17 @@
 #
 #       python hmm.py -L lengths.csv -S states.cvs -O obs.csv -T truth.csv -A viterbi
 #
+#   or if running without truth data:
+#       python hmm.py -L lengths.csv -S states.cvs -O obs.csv -W output.csv -A viterbi
+#
 #   -L specifies lengths file to be trained on
 #   -S specifies states file to be trained on
 #   -O specifies observation file to run algorithm on
 #   -T specifies the truth data to check the algorithm against
 #   -A specifies the algorithm to run
 #   -B specifies the bins to use for observations
+#
+#   -W specifies the file to write the output to if running without truth data
 #
 ######################################################################################
 # 
@@ -49,7 +54,7 @@ def print_usage():
 ######################################################################################
 def handle_args(argv):
     try:
-        opts, args = getopt.getopt(argv,"hO:o:T:t:A:a:S:s:L:l:B:b")
+        opts, args = getopt.getopt(argv,"hO:o:T:t:A:a:S:s:L:l:B:b:W:w")
     except getopt.GetoptError:
         print_usage()
         sys.exit(0)
@@ -64,6 +69,7 @@ def handle_args(argv):
     training_states_file = None
     observations_file = None
     truth_states_file = None
+    output_file = None
     algorithm = None
     bins = None
 
@@ -81,6 +87,8 @@ def handle_args(argv):
             truth_states_file = arg
         elif opt in ("-A", "-a"):
             algorithm = arg
+        elif opt in ("-W", "-w"):
+            output_file = arg
         elif opt in ("-B", "-b"):
             bins = arg.split(',')
             bins = [float(i) for i in bins]
@@ -94,6 +102,7 @@ def handle_args(argv):
     files['training_states'] = training_states_file
     files['observations'] = observations_file
     files['truth_states'] = truth_states_file
+    files['output'] = output_file
 
     return files,algorithm,bins
 
@@ -285,7 +294,7 @@ def train_hmm():
 #   Returns total accuracy and f scores
 #
 ######################################################################################
-def run_viterbi(observations_file,truth_file,training,bin_list):
+def run_viterbi(observations_file,truth_file,training,bin_list,output_file):
     print("\nRunning Viterbi...")
 
     # Open observation and truth data files
@@ -302,10 +311,11 @@ def run_viterbi(observations_file,truth_file,training,bin_list):
             obs.append(obs_diff)
 
     truth = []
-    with open(truth_file, 'r') as truth_data:
-        for line in truth_data:
-            truth_raw = line.split(',')
-            truth.append([float(i) for i in truth_raw])
+    if truth_file:
+        with open(truth_file, 'r') as truth_data:
+            for line in truth_data:
+                truth_raw = line.split(',')
+                truth.append([float(i) for i in truth_raw])
 
     # Feed each list of observations and truth data into viterbi
     # Do metrics calculations
@@ -317,17 +327,24 @@ def run_viterbi(observations_file,truth_file,training,bin_list):
         newresults = []
         for result in results[1:len(results)-1]:
             newresults.append(float(result))
-        calculate_metrics(newresults, truth[i][:len(truth[i])-1])
 
-        #print newresults
-        #print truth[i][:len(truth[i])-1]
-
-        total_results = total_results + newresults
-        total_truth = total_truth + truth[i][:len(truth[i])-1]
+        if truth:
+            calculate_metrics(newresults, truth[i][:len(truth[i])-1])
+            total_truth = total_truth + truth[i][:len(truth[i])-1]
+            total_results = total_results + newresults
+        else:
+            with open(output_file,'a') as output:
+                for item in newresults:
+                    output.write("%s," % item)
+                output.write('\n')
 
     # Calculate total metric of viterbi
     print("Calculating total accuracy...")
-    accuracy,f1_macro,f1_weighted = calculate_metrics(total_results, total_truth)
+    accuracy = None
+    f1_macro = None
+    f1_weighted = None
+    if total_truth:
+        accuracy,f1_macro,f1_weighted = calculate_metrics(total_results, total_truth)
     return accuracy, f1_macro,f1_weighted
 
 ######################################################################################
@@ -381,8 +398,8 @@ def run_fwd_bkw(observations_file,truth_file,training):
 
     # Calculate total metric of viterbi
     print("Calculating total accuracy...")
-    print total_results
-    print total_truth
+    #print total_results
+    #print total_truth
     calculate_metrics(total_results, total_truth)
     return
 
@@ -411,8 +428,8 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
     returnList = []
     V = [{}] #V is a list of dictionaries, each of the dictionaries is a time which has a dictionary of states
     #print start_p
-    print trans_p
-    print emit_p
+    #print trans_p
+    #print emit_p
     obs = [-99999.] + obs[1:] + [99999.]
     #print obs
     #print obs[0]
@@ -459,7 +476,7 @@ def viterbi(obs, states, start_p, trans_p, emit_p): #stat_p, trans_p and emit_p 
 
     opt = []
     # The highest probability
-    print V[-1].values()
+    #print V[-1].values()
     max_prob = max(value["prob"] for value in V[-1].values())
     previous = None
     # Get most probable state and its backtrack
@@ -596,11 +613,12 @@ def main(argv):
     print("Training States File:\t{0}".format(files['training_states']))
     print("Observations_file:\t{0}".format(files['observations']))
     print("Truth States File:\t{0}".format(files['truth_states']))
+    print("Output File:\t{0}".format(files['output']))
     print("Algorithm:\t\t{0}".format(algo))
     print
 
     training = do_train(files['training_lengths'],files['training_states'],bins)
-    run_viterbi(files['observations'],files['truth_states'],training,bins)
+    run_viterbi(files['observations'],files['truth_states'],training,bins,files['output'])
     ###run_fwd_bkw(files['observations'],files['truth_states'],training)
     
     return
