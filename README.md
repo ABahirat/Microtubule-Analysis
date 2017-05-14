@@ -18,11 +18,11 @@ The program has the following options:
 
 For example the program can be run with truth data with the following:
 
-`python hmm.py -L lengths.csv -S states.cvs -O obs.csv -T truth.csv -A viterbi`
+`python hmm.py -L lengths.csv -S states.cvs -O obs.csv -T truth.csv -A viterbi -B -0.2,-0.1,0.0,0.1,0.2`
 
 Or with no truth data but an output file:
 
-`python hmm.py -L lengths.csv -S states.cvs -O obs.csv -W output.csv -A viterbi`
+`python hmm.py -L lengths.csv -S states.cvs -O obs.csv -W output.csv -A viterbi -B -0.2,-0.1,0.0,0.1,0.2`
 
 There are lots of example BASH test scripts in the test scripts directory that are examples as well. 
 
